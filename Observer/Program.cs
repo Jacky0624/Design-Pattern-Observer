@@ -1,13 +1,13 @@
 ﻿
 MachineDownTimeStation station = new MachineDownTimeStation();
 IAlerter alerter = new MailManager();
-IObserver SW = new Department(alerter, "SW");
-IObserver QE = new Department(alerter, "QE");
-IObserver ED = new Department(alerter, "ED");
-station.Attach(SW);
-station.Attach(QE);
-station.Attach(ED);
+IObserver sw = new SWDepartment(alerter);
+IObserver ed = new EDDepartment(alerter);
+IObserver qe = new QEDepartment(alerter);
 
+station.Attach(sw);
+station.Attach(ed);
+station.Attach(qe);
 station.StartTime = DateTime.Now;
 
 interface IObserver
@@ -61,11 +61,10 @@ class MachineDownTimeStation : ISubject
 class Department : IObserver
 {
     private readonly IAlerter _alerter;
-    public string Name { get; }
+    public string Name { get; protected set; }
     public Department(IAlerter alerter, string name)
     {
         _alerter = alerter;
-        Name = name;
     }
     public void Update(ISubject subject)
     {
@@ -73,9 +72,31 @@ class Department : IObserver
 
         _alerter.Alert(Name, $"Machine is down from {station?.StartTime.ToString("yyyy/MM/dd HH:mm:ss")}");
     }
-
-  
 }
+
+class SWDepartment : Department
+{
+    public SWDepartment(IAlerter alerter) : base(alerter,"SW")
+    {
+        Name = "SW";
+    }
+}
+class EDDepartment : Department
+{
+    public EDDepartment(IAlerter alerter) : base(alerter, "ED")
+    {
+        Name = "ED";
+    }
+}
+class QEDepartment : Department
+{
+    public QEDepartment(IAlerter alerter) : base(alerter, "QE")
+    {
+        Name = "QE";
+    }
+}
+
+
 
 interface IAlerter
 {
